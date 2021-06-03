@@ -5,7 +5,6 @@ import { View, Button, Text } from '@tarojs/components'
 import { add, minus, asyncAdd } from '../../actions/counter'
 
 import * as Api from '@/api/index'
-console.log(Api)
 
 import './index.scss'
 
@@ -30,7 +29,11 @@ class Index extends Component {
 
   componentWillUnmount () { }
 
-  componentDidShow () { }
+  componentDidShow () { 
+    Api.getBannerList().then((res) => {
+      console.log(res)
+    })
+  }
 
   componentDidHide () { }
 

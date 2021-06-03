@@ -10,13 +10,13 @@ if (!envVersion) {
 let host = ''
 switch (envVersion) {
   case 'develop':
-    host = "https://test.domain.cn"
+    host = "https://mock.mengxuegu.com/mock/609ab96cc7b7385be0a8363f/example"
     break;
   case 'trial':
-    host = "https://test.domain.cn"
+    host = "https://mock.mengxuegu.com/mock/609ab96cc7b7385be0a8363f/example"
     break;
   case 'release':
-    host = "https://admin.domain.cn"
+    host = "https://mock.mengxuegu.com/mock/609ab96cc7b7385be0a8363f/example"
     break;
 }
 
