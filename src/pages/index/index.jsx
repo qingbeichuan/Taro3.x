@@ -1,6 +1,7 @@
 import { Component } from 'react'
 import { connect } from 'react-redux'
 import { View, Button, Text } from '@tarojs/components'
+import Taro from '@tarojs/taro'
 
 import { add, minus, asyncAdd } from '../../actions/counter'
 
@@ -24,15 +25,50 @@ import './index.scss'
 }))
 class Index extends Component {
   componentWillReceiveProps (nextProps) {
-    console.log(this.props, nextProps)
+    // console.log(this.props, nextProps)
   }
 
   componentWillUnmount () { }
 
-  componentDidShow () { 
-    Api.getBannerList().then((res) => {
-      console.log(res)
-    })
+  async componentDidShow () {
+    try {
+      const res = await Api.getGiftCardListCount({data: {
+        version: '2.8.24',
+        channel: 6,
+        openid: 'oj0FH41tNgZGkYvtdkFwl78a1t3E',
+        token: Taro.getStorageSync('token'),
+        userId: 3152963
+      }})
+    } catch (error) {
+      console.log(error);
+    }
+
+    try {
+      const res = await Api.getCouponList({data: {
+        version: '2.8.24',
+        channel: 6,
+        openid: 'oj0FH41tNgZGkYvtdkFwl78a1t3E',
+        token: Taro.getStorageSync('token'),
+        userId: 3152963,
+        checkShop: 0
+      }})
+    } catch (error) {
+      console.log(error);
+    }
+
+    try {
+      const res = await Api.getRightsList({data: {
+        version: '2.8.24',
+        channel: 6,
+        openid: 'oj0FH41tNgZGkYvtdkFwl78a1t3E',
+        token: Taro.getStorageSync('token'),
+        userId: 3152963,
+        levelId: 1,
+        merId: 31
+      }})
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   componentDidHide () { }
