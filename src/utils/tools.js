@@ -1,3 +1,5 @@
+import Taro from '@tarojs/taro'
+
 /**
  * @description: 本地存储
  * @param {string}

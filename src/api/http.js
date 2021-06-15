@@ -7,7 +7,7 @@ class Http {
     this.isRefreshing = true,
     this.subscribers = []
     Taro.addInterceptor(this.customInterceptor)
-    Taro.addInterceptor(Taro.interceptors.logInterceptor)
+    // Taro.addInterceptor(Taro.interceptors.logInterceptor)
   }
   _addSubscriber(callback) {
     this.subscribers.push(callback)
@@ -121,17 +121,19 @@ class Http {
       });
     })
   }
-  get(url, options) {
+  get(url, data, options) {
     return this._request({
       method: 'GET',
       url,
+      data,
       ...options
     })
   }
-  post(url, options) {
+  post(url, data, options) {
     return this._request({
+      url, 
+      data,
       method: 'POST',
-      url,
       ...options
     })
   }
