@@ -2,7 +2,8 @@ import Taro from '@tarojs/taro'
 import { Component } from 'react'
 import { connect } from 'react-redux'
 import { View, Button, Image } from '@tarojs/components'
-import { checkAuthStatus } from '@/actions/global'
+import { cancelAuth } from '@/actions/global'
+import { storage } from '@/utils/tools'
 import './index.scss'
 
 const Env = Taro.getEnv();
@@ -11,13 +12,14 @@ const canIUseGetUserProfile = Env === 'WEAPP' ? !!wx.getUserProfile : false;
 @connect(({ global }) => ({
   isAuthorized: global.isAuthorized
 }), (dispatch) => ({
-  checkAuthStatus () {
-    dispatch(checkAuthStatus({
-      payload: 123
-    }))
+  cancelAuth(status) {
+    dispatch(cancelAuth(status))
   }
 }))
 class Authorize extends Component {
+  static defaultProps = {
+    showCancel: true
+  }
   confirmAuthrize(res) {
     if (Env === 'ALIPAY') {
       Taro.getOpenUserInfo({
@@ -38,27 +40,23 @@ class Authorize extends Component {
       userInfo && Taro.setStorageSync('userInfo', userInfo);
       this.props.userInfoAuthorized(userInfo);
     }
-    sensorsHelper.userInfoAuthorize("用户授权", this.props.pageName);
   }
 
   handleProfileAuthorize = () => {
-    console.log('handleProfileAuthorize');
     wx.getUserProfile({
       desc: '用于完善会员资料',
-      success: res => {
-        let { iv, encryptedData, userInfo } = res;
-        console.log('.................',userInfo)
-        Taro.setStorageSync('iv',iv)
-        Taro.setStorageSync('encryptedData',encryptedData)
-        Taro.setStorageSync('userInfo', userInfo)
-        Taro.setStorageSync('timUserAvatarUrl', userInfo.avatarUrl)
-        this.props.userInfoAuthorized(userInfo);
+      success: ({ userInfo }) => {
+        storage.set('userInfo', userInfo)
+        this.props.cancelAuth(true)
       },
       fail: () => {
         console.log('拒绝授权')
-        this.props.cancelAuthorize()
       }
     })
+  }
+
+  cancelAuthorize = () => {
+    this.props.cancelAuth(true)
   }
 
   render() {
@@ -67,23 +65,25 @@ class Authorize extends Component {
     const commonIcon = <Image className="wx" src={'https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/wx2.png'} />
     return (
       <View>
-        { Env !== 'WEB' && !isAuthorized ?
-          <View className="panel authorize">
-            <View className="shadow"></View>
-            <View className="panelContent" catchTouchMove="ture">
-              {showCancel ? <View onClick={cancelAuthorize} className="closeBtn"><Image className="innerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png'/></View> : null}
-              <Image mode="widthFix" className="centerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/authorize.jpg' />
-              <View class="content">
-                {Env === 'ALIPAY' && <View class="title">支付宝授权</View>}
-                {Env === 'WEAPP' && <View class="title">微信授权</View>}
-                <View class="tit">Tims需要获取您的用户信息</View>
-                <View className="flex-item confirmBtn">
-                  {Env === 'ALIPAY' && <Button className="btn" scope="userInfo" open-type="getAuthorize" onClick={this.handleTrackConfirm.bind(this)} onGetAuthorize={this.confirmAuthrize.bind(this)}>确定</Button>}
-                  {Env === 'WEAPP' && (canIUseGetUserProfile ?  <Button className="btn"  onClick={this.handleProfileAuthorize}>{commonIcon}授权登录</Button> : <Button className="btn" open-type="getUserInfo" bindgetuserinfo={this.confirmAuthrize.bind(this)}>{commonIcon}授权登录</Button>)}
+        { 
+          !isAuthorized ?
+            <View className="panel authorize">
+              <View className="shadow"></View>
+              <View className="panelContent" catchTouchMove="ture">
+                {showCancel ? <View onClick={this.cancelAuthorize} className="closeBtn"><Image className="innerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png'/></View> : null}
+                <Image mode="widthFix" className="centerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/authorize.jpg' />
+                <View class="content">
+                  {Env === 'ALIPAY' && <View class="title">支付宝授权</View>}
+                  {Env === 'WEAPP' && <View class="title">微信授权</View>}
+                  <View class="tit">Tims需要获取您的用户信息</View>
+                  <View className="flex-item confirmBtn">
+                    {Env === 'ALIPAY' && <Button className="btn" scope="userInfo" open-type="getAuthorize" onClick={this.handleTrackConfirm.bind(this)} onGetAuthorize={this.confirmAuthrize.bind(this)}>确定</Button>}
+                    {Env === 'WEAPP' && (canIUseGetUserProfile ?  <Button className="btn"  onClick={this.handleProfileAuthorize}>{commonIcon}授权登录</Button> : <Button className="btn" open-type="getUserInfo" bindgetuserinfo={this.confirmAuthrize.bind(this)}>{commonIcon}授权登录</Button>)}
+                  </View>
                 </View>
               </View>
-            </View>
-          </View> : null}
+            </View> : null
+          }
       </View>
     )
   }

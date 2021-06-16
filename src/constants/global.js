@@ -1,1 +1,2 @@
 export const CHECK_AUTH_STATUS = 'CHECK_AUTH_STATUS'
+export const CANCEL_AUTH = 'CANCEL_AUTH'
