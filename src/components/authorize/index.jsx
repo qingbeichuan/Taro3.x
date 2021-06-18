@@ -55,12 +55,9 @@ class Authorize extends Component {
     })
   }
 
-  cancelAuthorize = () => {
-    this.props.cancelAuth(true)
-  }
 
   render() {
-    const { isAuthorized, cancelAuthorize, showCancel } = this.props;
+    const { isAuthorized, cancelAuth, showCancel } = this.props;
 
     const commonIcon = <Image className="wx" src={'https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/wx2.png'} />
     return (
@@ -70,7 +67,7 @@ class Authorize extends Component {
             <View className="panel authorize">
               <View className="shadow"></View>
               <View className="panelContent" catchTouchMove="ture">
-                {showCancel ? <View onClick={this.cancelAuthorize} className="closeBtn"><Image className="innerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png'/></View> : null}
+                {showCancel ? <View onClick={() => cancelAuth(true)} className="closeBtn"><Image className="innerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png'/></View> : null}
                 <Image mode="widthFix" className="centerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/authorize.jpg' />
                 <View class="content">
                   {Env === 'ALIPAY' && <View class="title">支付宝授权</View>}
