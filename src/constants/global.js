@@ -1,2 +1,4 @@
 export const CHECK_AUTH_STATUS = 'CHECK_AUTH_STATUS'
-export const CANCEL_AUTH = 'CANCEL_AUTH'
+export const HANDLE_AUTH = 'HANDLE_AUTH'
+export const GET_MEMBER_INFO = 'GET_MEMBER_INFO'
+export const UPDATE_TOKRN = 'UPDATE_TOKRN'

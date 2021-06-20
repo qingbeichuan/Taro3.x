@@ -26,8 +26,8 @@ import './index.scss'
   asyncAdd () {
     dispatch(asyncAdd())
   },
-  checkAuthStatus() {
-    dispatch(checkAuthStatus())
+  checkAuthStatus(bool) {
+    dispatch(checkAuthStatus(bool))
   }
 }))
 class Index extends Component {
@@ -38,25 +38,21 @@ class Index extends Component {
   componentWillUnmount () { }
 
   async componentDidShow () {
+    await this.props.checkAuthStatus()
+    if (this.props.isAuthorized) {
+      this.getInitData()
+    }
+  }
+
+  getInitData = async () => {
     try {
-      const res = await Api.getGiftCardListCount({
-        version: '2.8.24',
-        channel: 6,
-        openid: 'oj0FH41tNgZGkYvtdkFwl78a1t3E',
-        token: Taro.getStorageSync('token'),
-        userId: 3152963
-      })
+      const res = await Api.getGiftCardListCount()
     } catch (error) {
       console.log(error);
     }
 
     try {
       const res = await Api.getCouponList({
-        version: '2.8.24',
-        channel: 6,
-        openid: 'oj0FH41tNgZGkYvtdkFwl78a1t3E',
-        token: Taro.getStorageSync('token'),
-        userId: 3152963,
         checkShop: 0
       })
     } catch (error) {
@@ -65,13 +61,7 @@ class Index extends Component {
 
     try {
       const res = await Api.getRightsList({
-        version: '2.8.24',
-        channel: 6,
-        openid: 'oj0FH41tNgZGkYvtdkFwl78a1t3E',
-        token: Taro.getStorageSync('token'),
-        userId: 3152963,
         levelId: 1,
-        merId: 31
       })
     } catch (error) {
       console.log(error);
@@ -82,9 +72,8 @@ class Index extends Component {
 
   add = async () => {
     console.log(this.props.isAuthorized);
-    await this.props.checkAuthStatus()
+    await this.props.checkAuthStatus(true)
     if (this.props.isAuthorized) {
-      console.log(123)
       this.props.add()
     }
   }
@@ -97,7 +86,7 @@ class Index extends Component {
         <Button className='dec_btn' onClick={this.props.asyncAdd}>async</Button>
         <View><Text>{this.props.counter.num}</Text></View>
         <View><Text>Hello, World</Text></View>
-        <Authorize />
+        <Authorize onUpdate={this.getInitData}/>
       </View>
     )
   }

@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro'
+import { storage } from '@/utils/tools'
 
 const accountInfo = Taro.getAccountInfoSync();
 const {
@@ -41,10 +42,7 @@ const codeMessage = {
 const commonParams = {
   version: '2.8.24',
   channel: 6,
-  openid: 'oj0FH41tNgZGkYvtdkFwl78a1t3E',
-  userId: 3152963,
   merId: 31,
-  unionId: 'oITRn6CtPNElXEsYpt9izk0wP2eA'
 }
 
 export default {

@@ -18,31 +18,36 @@ class Http {
     })
     this.subscribers = [];
   }
-  _request(params) {
-    let { 
-      url, 
+  _request({ url, method, data, options = {} }) {
+    let {
       contentType = 'form',
       loading = false,
       succToast = false,
       errToast = true,
-    } = params
+    } = options
     contentType = contentType == 'form' ? 'application/x-www-form-urlencoded' : 'application/json;charset=utf-8'
-    const options = {
-      succToast,
-      errToast,
+    const params = {
+      url: url.includes('http') ? url : `${config.host}${url}`,
+      method,
+      data: {
+        ...data,
+        openid: storage.get('openId'),
+        userId: storage.get('memberInfo').userId || '',
+        unionid: storage.get('unionId'),
+        ...config.commonParams,
+      },
       header: {
         'Content-Type': contentType,
-        ...config.commonParams,
         token: storage.get('token'),
       },
+      succToast,
+      errToast,
       timeout: 5000,
-      ...params,
-      url: url.includes('http') ? url : `${config.host}${url}`,
     }
     loading && Taro.showLoading({
       title: loading,
     })
-    return Taro.request(options)
+    return Taro.request(params)
   }
   _showToast(msg) {
     Taro.showToast({
@@ -103,7 +108,10 @@ class Http {
               ...config.commonParams
             },
             data: {
-              ...config.commonParams
+              ...config.commonParams,
+              userId: storage.get('memberInfo').userId || '',
+              unionId: storage.get('unionId'),
+              openid: storage.get('openId'),
             },
             success(res) {
               const { errcode, data: { token } } = res.data;
@@ -123,18 +131,18 @@ class Http {
   }
   get(url, data, options) {
     return this._request({
-      method: 'GET',
       url,
+      method: 'GET',
       data,
-      ...options
+      options
     })
   }
   post(url, data, options) {
     return this._request({
-      url, 
-      data,
+      url,
       method: 'POST',
-      ...options
+      data,
+      options
     })
   }
 }
