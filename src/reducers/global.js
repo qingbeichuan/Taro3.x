@@ -1,16 +1,14 @@
 import { 
   CHECK_AUTH_STATUS,
   HANDLE_AUTH,
-  GET_MEMBER_INFO,
-  UPDATE_TOKRN
+  GET_MEMBER_INFO
  } from '../constants/global'
  import { storage } from '@/utils/tools'
 
 const INITIAL_STATE = {
-  isAuthorized: true,
+  isAuthorized: storage.get('userInfo') || {},
   userClick: false,
   memberInfo: storage.get('memberInfo') || {},
-  token: storage.get('token') 
 }
 
 export default function global(state = INITIAL_STATE, action) {
@@ -26,11 +24,6 @@ export default function global(state = INITIAL_STATE, action) {
         ...action.payload
       }
     case GET_MEMBER_INFO:
-      return {
-        ...state,
-        ...action.payload
-      }
-    case UPDATE_TOKRN:
       return {
         ...state,
         ...action.payload

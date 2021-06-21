@@ -20,6 +20,11 @@ export const jsCode2Openid = (params)=>{
   return http.get('/jsCode2Openid', params);
 }
 
-export const fetchUserInfoById = (params) => {
+export const fetchUserInfo = (params) => {
   return http.get('/member/userInfo', params)
+}
+
+//解密数据
+export const encryptedData = (params)=>{
+  return http.get('/encryptedData', params)
 }

@@ -84,3 +84,67 @@
     vertical-align: middle;
   }
 }
+.panel {
+  position: fixed;
+  display: block;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  .shadow {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    top: 0;
+    left: 0;
+    z-index: 999;
+  }
+  .panelContent {
+    z-index: 1000;
+    font-size: 0;
+    position: absolute;
+    width: 670px;
+    box-sizing: border-box;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #333;
+    text-align: center;
+    background: #fff;
+    border-radius: 20px; /* overflow:hidden; */
+  }
+}
+
+.panelRegister{
+  .shadow{ background:rgba(0,0,0,0.8); }
+  .panelContent{ width:670px; background:none; position:relative;
+     .closeBtn{ top:0; right:0; height:50px; width:50px; z-index:100; position: absolute;
+      .innerImg {
+        height: 100%;
+        width: 100%; }
+    }
+    .content {
+      padding: 80px 60px 60px 60px; 
+    }
+  }
+  .bgImg{ width:100%; }
+  .content{ font-size:20px; background:#fff; border-radius:0 0 30px 30px; padding-top:32px!important; }
+  .content .txt{ font-size:24px; color:#E5899A; position:relative; }
+  .content .txt:before{ height:2px; width:150px; background:#fff; display:inline-block; content:''; top:50%; left:70px; transform:translateY(-50%); position:absolute;   }
+  .content .txt:after{ height:2px; width:150px; background:#fff; display:inline-block; content:''; top:50%; right:70px; transform:translateY(-50%); position:absolute;   }
+  .content .rights{ margin-top:15px;
+    .item{ display:inline-block; color:#E5899A; padding:0 30px;
+       .icon{ height:20px; width:18px; display:inline-block; vertical-align:middle; margin-right:8px; }
+    }
+  }
+  .content .protocol{  font-size:24px;vertical-align:middle; color:#BAB6B6; }
+  .content .protocol .yes{ height:26px; width:26px; display:inline-block; margin-right:12px; vertical-align:middle; }
+  .content .protocol .link{ color:#C8102E; }
+  .content .authorizeBtn{ margin:30px 0 40px 0; line-height:100px; height:100px; border-radius:50px; color:#fff; font-weight:bold; font-size:32px; width:100%; background:#C8102E; border:none; }
+  .content .authorizeBtn .wx{ height:30px; width:36px; display:inline-block; margin-right:16px; vertical-align:middle;  }
+  .content .phoneRegister{ font-size:28px; color:#BAB6B6;}
+  .reject{ font-size:28px; color:#fff;  margin-top:30px; text-decoration:underline; }
+}

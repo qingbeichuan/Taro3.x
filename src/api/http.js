@@ -86,7 +86,7 @@ class Http {
           this.isRefreshing = false;
         } else {
           errToast && this._showToast(msg)
-          return res
+          return Promise.reject(_data)
         }
       } else if (statusCode === 401) {
         this.updateToken().then(() => {
