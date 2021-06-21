@@ -5,13 +5,14 @@ import { View, Button, Image, Text } from '@tarojs/components'
 import { handleAuth, getMemberInfo } from '@/actions/global'
 import { storage } from '@/utils/tools'
 import * as Api from '@/api/index'
+import { isEmptyObject } from '@/utils/tools'
 import './index.scss'
 
 const Env = Taro.getEnv();
 const canIUseGetUserProfile = Env === 'WEAPP' ? !!wx.getUserProfile : false;
 
 @connect(({ global }) => ({
-  isAuthorized: global.isAuthorized,
+  userInfo: global.userInfo,
   userClick: global.userClick,
   memberInfo: global.memberInfo
 }), (dispatch) => ({
@@ -27,7 +28,8 @@ class Authorize extends Component {
     onUpdate: () => { }
   }
   state = {
-    memberInfo: storage.get('memberInfo') || {}
+    memberInfo: storage.get('memberInfo') || {},
+    isShowRegieterPanel: false
   }
   // componentWillReceiveProps (nextProps) {
   //   if (this.props.memberInfo !== nextProps.memberInfo) {
@@ -164,36 +166,29 @@ class Authorize extends Component {
   }
 
   mobileNext(mobile) {
-    Api.fetchUserInfo(mobile).then((res) => {
-      Api.userLogin({
-        name: storage.get('userInfo').nickName, 
-        idType:5, 
-        amount: mobile,
-      }).then(res => {
-        console.log('=====登录成功=====');
-        this.setState({ panelYzmShow: false })
-      }).catch(err => {
-        return Promise.reject(err);
-      });
+    Api.fetchUserInfo({mobile}, {errToast: false}).then((res) => {
+      // Api.userLogin({
+      //   name: storage.get('userInfo').nickName, 
+      //   idType:5, 
+      //   amount: mobile,
+      // }).then(res => {
+      //   console.log('=====登录成功=====');
+      //   this.setState({ panelYzmShow: false })
+      // }).catch(err => {
+      //   return Promise.reject(err);
+      // });
     }).catch((err) => {
       console.log(err)
-      if (err.errcode == 401) {
-        Global.updateToken().then(res => {
-          this.mobileNext(mobile);
-        })
-      } else if (err.errcode == 100124) {
-        let { nickName, gender, birth } = userInfoCache;
-        if(Env=="ALIPAY") gender = gender=='m'?1:0;
+      if (err.errcode == 100124) {
+        let { userInfo: { gender, birth = '', avatarUrl } } = this.props;
+        if (Env=="ALIPAY") gender = gender == 'm' ? 1 : 0;
         const shopId = Taro.getStorageSync('shopId');
-        Api.userRegister({ mobile, gender, birth, shopId }).then(res => {
+        Api.userRegister({ 
+          mobile, gender, birth, shopId,
+          acceptPic: avatarUrl
+        }).then(res => {
           console.log('=====注册成功=====');
-          this.setState({ panelYzmShow: false })
-          if (pageData) {
-            this.pageDataHandle(mobile);
-          } else {
-            this.closePanelRegister();
-            this.pageInit();
-          }
+          this.props.getMemberInfo()
         }).catch(err => {
           console.log(err)
         })
@@ -214,18 +209,18 @@ class Authorize extends Component {
 
 
   render() {
-    const { isAuthorized, handleAuth, userClick, memberInfo } = this.props;
+    const { userInfo, handleAuth, userClick, memberInfo } = this.props;
     const { agree } = this.state
 
     const commonIcon = <Image className="wx" src={'https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/wx2.png'} />
     return (
       <View>
         {
-          (userClick && !isAuthorized) &&
+          (userClick && isEmptyObject(userInfo)) &&
           <View className="panel authorize">
             <View className="shadow"></View>
             <View className="panelContent" catchTouchMove="ture">
-              {<View onClick={() => handleAuth(true)} className="closeBtn"><Image className="innerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png' /></View>}
+              {<View onClick={() => handleAuth(false)} className="closeBtn"><Image className="innerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png' /></View>}
               <Image mode="widthFix" className="centerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/authorize.jpg' />
               <View class="content">
                 {Env === 'ALIPAY' && <View class="title">支付宝授权</View>}
@@ -240,10 +235,10 @@ class Authorize extends Component {
           </View>
         }
         {
-          (isAuthorized && JSON.stringify(memberInfo) == '{}') && <View class="panel panelRegister">
+          (userClick && !isEmptyObject(userInfo) && isEmptyObject(memberInfo)) && <View class="panel panelRegister">
             <View className="shadow"></View>
             <View className="panelContent" catchtouchmove="ture">
-              <View className="closeBtn" onClick={this.closePanelRegister.bind(this)}><Image className="innerImg" src={('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png')} /></View>
+              <View className="closeBtn" onClick={() => handleAuth(false)}><Image className="innerImg" src={('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png')} /></View>
               <Image mode="widthFix" className="bgImg" src="http://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/tims15907416499790e3f0a0434298b50cd0b231c7cce0d7.png" />
               <View class="content">
                 <View className="protocol" onClick={this.checkAgree.bind(this)}>

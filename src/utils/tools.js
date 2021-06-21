@@ -68,3 +68,12 @@ export function urlParse(url) {
   }
   return obj;
 };
+
+/**
+ * @description: 判断是否为空对象
+ * @param {obj} object
+ * @return {*}
+ */
+export function isEmptyObject(obj) {
+  return Object.keys(obj).length == 0
+}

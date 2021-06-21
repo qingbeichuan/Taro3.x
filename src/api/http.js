@@ -93,7 +93,8 @@ class Http {
           this._request({ ...requestParams })
        })
       } else {
-        this._showToast(config.codeMessage[statusCode])
+        const { message } = _data
+        this._showToast(message || config.codeMessage[statusCode])
         return Promise.reject(res)
       }
     })

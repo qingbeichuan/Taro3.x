@@ -11,33 +11,19 @@ import * as Api from '@/api/index'
 import http from "../api/http"
 
 /**
- * @description: 检查授权状态
+ * @description: 取消和确认授权
  * @param {boolean} bool true为手动点击
  * @return {object}
  */
-export const checkAuthStatus = (bool) => {
+export const handleAuth = (bool) => {
   return async dispatch => {
     dispatch({
-      type: CHECK_AUTH_STATUS,
+      type: HANDLE_AUTH,
       payload: {
-        isAuthorized: !!storage.get('userInfo'),
-        userClick: bool
+        userClick: bool,
+        userInfo: storage.get('userInfo') || {}
       }
     })
-  }
-}
-
-/**
- * @description: 取消和确认授权
- * @param {boolean} status
- * @return {object}
- */
-export const handleAuth = (status) => {
-  return {
-    type: HANDLE_AUTH,
-    payload: {
-      isAuthorized: status
-    }
   }
 }
 
@@ -51,7 +37,7 @@ export const getMemberInfo = (name) => {
     try {//用户存在
       const memberInfo = await Api.fetchUserInfo({
         name
-      })
+      }, { errToast: false })
       storage.set('memberInfo', memberInfo)
       const {
         userId

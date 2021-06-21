@@ -4,7 +4,8 @@ import { View, Button, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import Authorize from '../../components/authorize' 
 import { add, minus, asyncAdd } from '@/actions/counter'
-import { checkAuthStatus } from '@/actions/global'
+import { handleAuth } from '@/actions/global'
+import { isEmptyObject } from '@/utils/tools'
 
 import * as Api from '@/api/index'
 
@@ -12,7 +13,8 @@ import './index.scss'
 
 
 @connect(({ global, counter }) => ({
-  isAuthorized: global.isAuthorized,
+  userInfo: global.userInfo,
+  memberInfo: global.memberInfo,
   counter
 }), (dispatch) => ({
   add () {
@@ -26,8 +28,8 @@ import './index.scss'
   asyncAdd () {
     dispatch(asyncAdd())
   },
-  checkAuthStatus(bool) {
-    dispatch(checkAuthStatus(bool))
+  handleAuth(bool) {
+    dispatch(handleAuth(bool))
   }
 }))
 class Index extends Component {
@@ -38,8 +40,8 @@ class Index extends Component {
   componentWillUnmount () { }
 
   async componentDidShow () {
-    await this.props.checkAuthStatus()
-    if (this.props.isAuthorized) {
+    // await this.props.checkAuthStatus()
+    if (!isEmptyObject(this.props.memberInfo)) {
       this.getInitData()
     }
   }
@@ -71,9 +73,8 @@ class Index extends Component {
   componentDidHide () { }
 
   add = async () => {
-    console.log(this.props.isAuthorized);
-    await this.props.checkAuthStatus(true)
-    if (this.props.isAuthorized) {
+    await this.props.handleAuth(true)
+    if (!isEmptyObject(this.props.userInfo)) {
       this.props.add()
     }
   }

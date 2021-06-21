@@ -6,7 +6,7 @@ import {
  import { storage } from '@/utils/tools'
 
 const INITIAL_STATE = {
-  isAuthorized: storage.get('userInfo') || {},
+  userInfo: storage.get('userInfo') || {},
   userClick: false,
   memberInfo: storage.get('memberInfo') || {},
 }
