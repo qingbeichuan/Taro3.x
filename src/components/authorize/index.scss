@@ -148,3 +148,86 @@
   .content .phoneRegister{ font-size:28px; color:#BAB6B6;}
   .reject{ font-size:28px; color:#fff;  margin-top:30px; text-decoration:underline; }
 }
+
+.panelYzm .panelContent .title {
+  text-align: center;
+  font-size: 40px;
+  padding: 0;
+  font-weight: normal;
+  color: #342c2a;
+  margin-bottom: 10px;
+}
+.panelYzm .panelContent .tit {
+  color: #bab6b6;
+  font-size: 24px;
+  margin-bottom: 50px;
+}
+.panelYzm .panelContent .confirmbtn {
+  background: #c8102e;
+  color: #fff;
+  height: 100px;
+  line-height: 100px;
+  margin-top: 40px;
+  border-radius: 50px;
+  font-size: 35px;
+}
+.panelYzm .panelContent .fmGroup {
+  padding: 30px 10px 30px 45px;
+  background: #f6f6f6;
+  position: relative;
+  margin-bottom: 30px;
+  border-radius: 50px;
+}
+.panelYzm .panelContent .fmGroup.hasBtn {
+  padding-right: 210px;
+}
+.panelYzm .panelContent .fmGroup input {
+  text-align: left;
+  font-size: 26px;
+  width: 100%;
+  background: #f6f6f6;
+}
+.panelYzm .panelContent .fmGroup .captcha {
+  display: inline-block;
+  width: 180px;
+  height: 64px;
+  border-radius: 32px;
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  margin-top: -32px;
+}
+.panelYzm .panelContent .fmGroup .btn {
+  display: inline-block;
+  width: 180px;
+  height: 64px;
+  line-height: 64px;
+  border-radius: 32px;
+  text-align: center;
+  position: absolute;
+  font-size: 26px;
+  box-sizing: border-box;
+  right: 30px;
+  top: 50%;
+  margin-top: -32px;
+}
+.panelYzm .panelContent .fmGroup .sendBtn {
+  color: #d8d8d8;
+  border: 1px solid #d8d8d8;
+  display: inline-block;
+  width: 180px;
+  height: 64px;
+  line-height: 64px;
+  border-radius: 32px;
+  text-align: center;
+  position: absolute;
+  font-size: 26px;
+  box-sizing: border-box;
+  right: 30px;
+  top: 50%;
+  margin-top: -32px;
+}
+.panelYzm .panelContent .fmGroup .sendBtn.active {
+  border: 1px solid #666;
+  color: #666;
+}

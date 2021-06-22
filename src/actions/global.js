@@ -1,3 +1,4 @@
+import Taro from '@tarojs/taro'
 import {
   CHECK_AUTH_STATUS,
   HANDLE_AUTH,
@@ -50,6 +51,12 @@ export const getMemberInfo = (name) => {
         }
       })
     } catch (err) {
+      dispatch({
+        type: HANDLE_AUTH,
+        payload: {
+          userClick: true,
+        }
+      })
       if (err.errcode == 100124) {
         console.log('会员不存在');
       } else if (err.errcode == 1001241) {
