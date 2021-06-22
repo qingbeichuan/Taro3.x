@@ -7,10 +7,12 @@ import { storage } from '@/utils/tools'
 import * as Api from '@/api/index'
 import { isEmptyObject } from '@/utils/tools'
 import { AtMessage } from 'taro-ui'
+import config from '../../api/config'
 import './index.scss'
 
 const Env = Taro.getEnv();
 const canIUseGetUserProfile = Env === 'WEAPP' ? !!wx.getUserProfile : false;
+let timer = null
 
 @connect(({ global }) => ({
   userInfo: global.userInfo,
@@ -30,7 +32,8 @@ class Authorize extends Component {
   }
   state = {
     memberInfo: storage.get('memberInfo') || {},
-    phoneInput: ''
+    phoneInput: '',
+    counter: 60,
   }
   // componentWillReceiveProps (nextProps) {
   //   if (this.props.memberInfo !== nextProps.memberInfo) {
@@ -223,6 +226,12 @@ class Authorize extends Component {
     return { value: yzmInput };
   }
 
+  getCaptcha = () => {
+    this.setState({ 
+      codeImg: config.host+'/sms/getImageCode?version='+config.commonParams.version+'&openid='+storage.get('openId')+'&v='+Math.floor(Math.random()*1000) 
+    })
+  }
+
   openYzmRegister = () => {
     if (!this.state.agree) {
       this.setState({ panelTipShow: true, tipMsg: '请阅读并同意用户协议' })
@@ -250,13 +259,44 @@ class Authorize extends Component {
       return;
     }
     let mobile = phoneInput;
-    Api.checkCode(mobile, yzmInput).then(res => {
+    Api.checkCode({mobile, smsCode: yzmInput}).then(res => {
       console.log('验证通过')
       isFormPhonenumberCompleteRegister = true
       this.mobileNext(mobile);
     }).catch(err => {
       this.trackPhonenumberCompleteRegister(false, err)
       Taro.showToast({ title: err.msg||'内部错误', icon: 'none' });
+    })
+  }
+
+  sendCode = () => {
+    if (this.state.sendSuccess) return;
+    let { codeInput, phoneInput } = this.state;
+    if (phoneInput == '' || phoneInput.length < 11) {
+      Taro.showToast({ title: '请输入正确的手机号', icon: 'none' });
+      return;
+    }
+    if (codeInput == '') {
+      Taro.showToast({ title: '请输入图形验证码', icon: 'none' });
+      return;
+    }
+    let mobile = phoneInput;
+    Api.sendCode({mobile, imgCode: codeInput}).then(res => {
+      Taro.showToast({ title: '短信发送成功', icon: 'none' })
+      this.setState({ sendSuccess: true })
+      timer = setInterval(() => {
+        let counter = this.state.counter
+        if (counter == 0) {
+          this.getCaptcha()
+          this.setState({ sendSuccess: false, counter: 60 })
+          clearInterval(timer)
+        } else {
+          this.setState({ counter: counter - 1 })
+        }
+      }, 1000)
+    }).catch(err => {
+      // Taro.showToast({ title: err.msg + 'sendCode'||'内部错误', icon: 'none' })
+      this.getCaptcha()
     })
   }
 
@@ -268,7 +308,7 @@ class Authorize extends Component {
       userClick,
       memberInfo,
     } = this.props;
-    const { agree, panelYzmShow, phoneInput, codeInput, codeImg, yzmInput, sendSuccess  } = this.state
+    const { agree, panelYzmShow, phoneInput, codeInput, codeImg, yzmInput, sendSuccess , counter } = this.state
 
     const commonIcon = <Image className="wx" src={'https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/wx2.png'} />
     return (
@@ -313,7 +353,7 @@ class Authorize extends Component {
         }
 
         {
-          
+          panelYzmShow &&
           <View class="panel panelYzm">
             <View className="shadow"></View>
             <View className="panelContent" catchTouchMove="ture">

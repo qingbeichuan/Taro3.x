@@ -36,3 +36,12 @@ export const userRegister = (params) => {
   !shopId && delete param.shopId
   return httpPromise.post(url, param);
 }
+
+export const sendCode = (params)=>{
+  // const param = { ..._param, openid, mobile, imgCode };
+  return http.post('/sms/sendCode', params);
+}
+
+export const checkCode = (params)=>{
+  return http.post( '/sms/checkCode', params);
+}
