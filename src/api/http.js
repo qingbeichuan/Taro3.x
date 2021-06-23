@@ -117,7 +117,7 @@ class Http {
             success(res) {
               const { errcode, data: { token } } = res.data;
               if (errcode == 0) {
-                Taro.setStorageSync('token', token);
+                storage.set('token', token);
                 resolve(token);
               }
             }

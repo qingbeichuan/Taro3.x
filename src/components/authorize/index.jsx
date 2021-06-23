@@ -148,13 +148,8 @@ class Authorize extends Component {
           Api.encryptedData(response, sign).then((res) => {
             const { mobile } = JSON.parse(res.data);
             if (mobile) {
-              isFormPhonenumberCompleteRegister = true
               this.mobileNext(mobile);
             } else {
-              this.$sa.authorize_phonenumber({
-                is_success: false,
-                fail_reason: '获取手机号失败'
-              })
               Taro.showModal({ content: '获取手机号失败', showCancel: false })
             }
           }).catch((err) => {
@@ -261,10 +256,8 @@ class Authorize extends Component {
     let mobile = phoneInput;
     Api.checkCode({mobile, smsCode: yzmInput}).then(res => {
       console.log('验证通过')
-      isFormPhonenumberCompleteRegister = true
       this.mobileNext(mobile);
     }).catch(err => {
-      this.trackPhonenumberCompleteRegister(false, err)
       Taro.showToast({ title: err.msg||'内部错误', icon: 'none' });
     })
   }

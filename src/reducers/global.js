@@ -11,6 +11,7 @@ const INITIAL_STATE = {
   memberInfo: storage.get('memberInfo') || {},
 }
 
+
 export default function global(state = INITIAL_STATE, action) {
   switch (action.type) {
     case CHECK_AUTH_STATUS:
