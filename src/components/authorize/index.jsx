@@ -22,9 +22,7 @@ let timer = null
   handleAuth(status) {
     dispatch(handleAuth(status))
   },
-  async getMemberInfo(name) {
-    await dispatch(getMemberInfo(name))
-  }
+  getMemberInfo: para => dispatch(getMemberInfo(para))
 }))
 class Authorize extends Component {
   static props = {
@@ -33,6 +31,8 @@ class Authorize extends Component {
   state = {
     memberInfo: storage.get('memberInfo') || {},
     phoneInput: '',
+    codeInput: '',
+    yzmInput: '',
     counter: 60,
   }
   // componentWillReceiveProps (nextProps) {
@@ -94,17 +94,13 @@ class Authorize extends Component {
           const { openId, unionid: unionId } = await Api.jsCode2Openid({ jscode: code });
           storage.set('openId', openId)
           storage.set('unionId', unionId)
-          await this.props.getMemberInfo(name)
-          if (!isEmptyObject(this.props.memberInfo)) {
-            console.log('login success');
-            Taro.atMessage({
-              'message': '登陆成功',
-              'type': 'success',
-            })
-          }
+          await this.props.getMemberInfo({name})
+          Taro.atMessage({
+            'message': '登陆成功',
+            'type': 'success',
+          })
         } catch (err) {
-          // log.error('调用jsCode2Openid失败,'+JSON.stringify(err));
-          console.log(err);
+          console.log('err', err.msg);
         }
       },
       fail: (err) => {
@@ -113,33 +109,19 @@ class Authorize extends Component {
     })
   }
 
-  checkAgree() {
-    this.setState({ agree: !this.state.agree })
-  }
-
-  openProtocol(e) {
-    e.stopPropagation();
-    // let url = base.micvsDomain + 'tim-weixin/wechat/page/protocol'
-    // Taro.navigateTo({ url: '/pages/m_webview/index?url=' + url })
-  }
-
-  phoneAuthorized(res) {
-    if (!this.state.agree) {
-      this.setState({ panelTipShow: true, tipMsg: '请阅读并同意用户协议' })
-      return;
-    }
+  phoneAuthorized = async res => {
     if (Env == "WEAPP") {
-      const { encryptedData, iv } = res.detail;
-      if (encryptedData) {
-        Api.encryptedData({
-          encryptedData,
-          iv
-        }).then((res) => {
-          const mobile = res.purePhoneNumber;
-          this.mobileNext(mobile);
-        }).catch((err) => {
-          Taro.showModal({ content: '获取手机号失败', showCancel: false })
-        })
+      try {
+        const { encryptedData, iv } = res.detail;
+        if (encryptedData) {
+          const { purePhoneNumber: mobile } = await Api.encryptedData({
+            encryptedData,
+            iv
+          })
+          this.mobileNext(mobile)
+        }
+      } catch (err) {
+        console.log('解密失败', err)
       }
     } else if (Env == "ALIPAY") {
       my.getPhoneNumber({
@@ -164,35 +146,44 @@ class Authorize extends Component {
     }
   }
 
-  mobileNext(mobile) {//手机号注册检查用户是否存在
-    Api.fetchUserInfo({ mobile }, { errToast: false }).then((res) => {
-      // Api.userLogin({
-      //   name: storage.get('userInfo').nickName, 
-      //   idType:5, 
-      //   amount: mobile,
-      // }).then(res => {
-      //   console.log('=====登录成功=====');
-      //   this.setState({ panelYzmShow: false })
-      // }).catch(err => {
-      //   return Promise.reject(err);
-      // });
-    }).catch((err) => {
-      console.log(err)
-      if (err.errcode == 100124) {
-        let { userInfo: { gender, birth = '', avatarUrl, nickName: name } } = this.props;
+  async mobileNext(mobile) {//手机号注册检查是否是会员
+    try {
+      await this.props.getMemberInfo({ mobile })
+    } catch (err) {
+      console.log('err', err)
+      if (err.errcode == 100124) {//会员不存在
+        const { 
+          userInfo: { 
+            gender, 
+            birth = '', 
+            avatarUrl, 
+            nickName: name 
+          }
+        } = this.props;
         if (Env == "ALIPAY") gender = gender == 'm' ? 1 : 0;
-        const shopId = Taro.getStorageSync('shopId');
-        Api.userRegister({
-          mobile, gender, birth, shopId,
-          acceptPic: avatarUrl
-        }).then(res => {
-          console.log('=====注册成功=====');
-          this.props.getMemberInfo(name)
-        }).catch(err => {
-          console.log(err)
-        })
+        const shopId = storage.get('shopId');
+        try {
+          await Api.userRegister({
+            mobile, 
+            gender, 
+            birth, 
+            shopId,
+            acceptPic: avatarUrl,
+            name
+          })
+          await this.props.getMemberInfo({ mobile })
+          Taro.atMessage({
+            'message': '登陆成功',
+            'type': 'success',
+          })
+          this.setState({
+            panelYzmShow: false
+          })
+        } catch (error) {
+          console.log(error)
+        }
       }
-    })
+    }
   }
 
 
@@ -200,25 +191,14 @@ class Authorize extends Component {
     this.setState({ panelYzmShow: false, yzmInput: '', phoneInput: '', codeInput: '' })
   }
 
-  phoneInput = (e) => {
-    let phoneInput = e.target.value;
-    phoneInput = phoneInput.replace(/[^0-9]/g, '');
-    this.setState({ phoneInput })
-    return { value: phoneInput };
-  }
-
-  codeInput = (e) => {
-    let codeInput = e.target.value;
-    codeInput = codeInput.replace(/[^a-zA-Z0-9]/g, '').substr(0, 4);
-    this.setState({ codeInput })
-    return { value: codeInput };
-  }
-
-  yzmInput = (e) => {
-    let yzmInput = e.target.value;
-    yzmInput = yzmInput.replace(/[^0-9]/g, '');
-    this.setState({ yzmInput })
-    return { value: yzmInput };
+  handleInput = (type) => {
+    return (e) => {
+      this.setState({
+        [type]: e.target.value
+      }, () => {
+        console.log(this.state);
+      })
+    }
   }
 
   getCaptcha = () => {
@@ -228,69 +208,57 @@ class Authorize extends Component {
   }
 
   openYzmRegister = () => {
-    if (!this.state.agree) {
-      this.setState({ panelTipShow: true, tipMsg: '请阅读并同意用户协议' })
-      return;
-    }
     this.getCaptcha();
     this.setState({ panelYzmShow: true })
   }
 
-  subimitFun = () => {
-    let { codeInput, phoneInput } = this.state;
+  subimitFun = async () => {
+    const { codeInput, phoneInput, yzmInput } = this.state;
     if (phoneInput == '' || phoneInput.length < 11) {
       Taro.showToast({ title: '请输入正确的手机号', icon: 'none' });
       return;
     }
-
     if (codeInput == '') {
       Taro.showToast({ title: '请输入图形验证码', icon: 'none' });
       return;
     }
-
-    let { yzmInput } = this.state;
     if (yzmInput == '') {
       Taro.showToast({ title: '请输入短信验证码', icon: 'none' });
       return;
     }
-    let mobile = phoneInput;
-    Api.checkCode({mobile, smsCode: yzmInput}).then(res => {
-      console.log('验证通过')
-      this.mobileNext(mobile);
-    }).catch(err => {
+    try {
+      await Api.checkCode({ mobile: phoneInput, smsCode: yzmInput })
+      this.mobileNext(phoneInput);
+    } catch (error) {
       Taro.showToast({ title: err.msg||'内部错误', icon: 'none' });
-    })
+    }
   }
 
-  sendCode = () => {
-    if (this.state.sendSuccess) return;
-    let { codeInput, phoneInput } = this.state;
-    if (phoneInput == '' || phoneInput.length < 11) {
+  sendCode = async () => {
+    const { codeInput, phoneInput, counter } = this.state;
+    if (timer) return;
+    if (!(/^1[3456789]\d{9}$/.test(phoneInput))) {
       Taro.showToast({ title: '请输入正确的手机号', icon: 'none' });
       return;
     }
-    if (codeInput == '') {
-      Taro.showToast({ title: '请输入图形验证码', icon: 'none' });
-      return;
-    }
-    let mobile = phoneInput;
-    Api.sendCode({mobile, imgCode: codeInput}).then(res => {
+    try {
+      await Api.sendCode({ mobile: phoneInput, imgCode: codeInput })
       Taro.showToast({ title: '短信发送成功', icon: 'none' })
-      this.setState({ sendSuccess: true })
       timer = setInterval(() => {
-        let counter = this.state.counter
         if (counter == 0) {
           this.getCaptcha()
-          this.setState({ sendSuccess: false, counter: 60 })
+          this.setState({ counter: 60 })
           clearInterval(timer)
         } else {
-          this.setState({ counter: counter - 1 })
+          this.setState({ 
+            counter: counter - 1 
+          })
         }
       }, 1000)
-    }).catch(err => {
-      // Taro.showToast({ title: err.msg + 'sendCode'||'内部错误', icon: 'none' })
+    } catch (err) {
+      Taro.showToast({ title: err.msg, icon: 'none' })
       this.getCaptcha()
-    })
+    }
   }
 
 
@@ -301,9 +269,7 @@ class Authorize extends Component {
       userClick,
       memberInfo,
     } = this.props;
-    const { agree, panelYzmShow, phoneInput, codeInput, codeImg, yzmInput, sendSuccess , counter } = this.state
-
-    const commonIcon = <Image className="wx" src={'https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/wx2.png'} />
+    const { panelYzmShow, phoneInput, codeInput, codeImg, yzmInput, sendSuccess , counter } = this.state
     return (
       <View>
         {
@@ -312,14 +278,13 @@ class Authorize extends Component {
             <View className="shadow"></View>
             <View className="panelContent" catchTouchMove="ture">
               {<View onClick={() => handleAuth(false)} className="closeBtn"><Image className="innerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png' /></View>}
-              <Image mode="widthFix" className="centerImg" src='https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/authorize.jpg' />
               <View class="content">
                 {Env === 'ALIPAY' && <View class="title">支付宝授权</View>}
                 {Env === 'WEAPP' && <View class="title">微信授权</View>}
                 <View class="tit">Tims需要获取您的用户信息</View>
                 <View className="flex-item confirmBtn">
                   {Env === 'ALIPAY' && <Button className="btn" scope="userInfo" open-type="getAuthorize" onClick={this.handleTrackConfirm.bind(this)} onGetAuthorize={this.confirmAuthrize.bind(this)}>确定</Button>}
-                  {Env === 'WEAPP' && (canIUseGetUserProfile ? <Button className="btn" onClick={this.handleProfileAuthorize}>{commonIcon}授权登录</Button> : <Button className="btn" open-type="getUserInfo" bindgetuserinfo={this.confirmAuthrize.bind(this)}>{commonIcon}授权登录</Button>)}
+                  {Env === 'WEAPP' && (canIUseGetUserProfile ? <Button className="btn" onClick={this.handleProfileAuthorize}>授权登录</Button> : <Button className="btn" open-type="getUserInfo" bindgetuserinfo={this.confirmAuthrize.bind(this)}>{commonIcon}授权登录</Button>)}
                 </View>
               </View>
             </View>
@@ -330,14 +295,10 @@ class Authorize extends Component {
             <View className="shadow"></View>
             <View className="panelContent" catchtouchmove="ture">
               <View className="closeBtn" onClick={() => handleAuth(false)}><Image className="innerImg" src={('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png')} /></View>
-              <Image mode="widthFix" className="bgImg" src="http://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/tims15907416499790e3f0a0434298b50cd0b231c7cce0d7.png" />
+              {/* <Image mode="widthFix" className="bgImg" src="http://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/tims15907416499790e3f0a0434298b50cd0b231c7cce0d7.png" /> */}
               <View class="content">
-                <View className="protocol" onClick={this.checkAgree.bind(this)}>
-                  {agree ? <Image className="yes" src={('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/select.png')} /> : <Image className="yes" src={('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/select-un.png')} />}
-                  我已阅读并同意<Text onClick={this.openProtocol.bind(this)}>《用户协议》</Text>
-                </View>
-                {Env == "WEAPP" && <Button className="btn authorizeBtn" openType="getPhoneNumber" onGetPhoneNumber={this.phoneAuthorized.bind(this)}><Image className="wx" src={('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/wx2.png')} />微信快速注册</Button>}
-                {Env == "ALIPAY" && <Button className="btn authorizeBtn" scope='phoneNumber' openType="getAuthorize" onGetAuthorize={this.phoneAuthorized.bind(this)}>快速注册</Button>}
+                {Env == "WEAPP" && <Button className="btn authorizeBtn" openType="getPhoneNumber" onGetPhoneNumber={this.phoneAuthorized}><Image className="wx" src={('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/wx2.png')} />微信快速注册</Button>}
+                {Env == "ALIPAY" && <Button className="btn authorizeBtn" scope='phoneNumber' openType="getAuthorize" onGetAuthorize={this.phoneAuthorized}>快速注册</Button>}
                 <View onClick={this.openYzmRegister} className="phoneRegister">使用手机号注册 ></View>
               </View>
               <View className="reject" onClick={() => handleAuth(false)}>暂不登录</View>
@@ -353,16 +314,15 @@ class Authorize extends Component {
               <View className="closeBtn" onClick={this.closeYzmPanel}><Image className="innerImg" src={('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/user/close.png')} /></View>
               <View class="content">
                 <View className="title">请绑定手机号</View>
-                <View className="tit">欢迎加入Tims会员俱乐部</View>
                 <View className="fmGroup hasBtn">
-                  <Input type="text" maxlength="11" onInput={this.phoneInput} value={phoneInput} placeholder="请输入手机号" enableNative={true} controlled={true} />
+                  <Input type="number" maxlength="11" onInput={this.handleInput('phoneInput')} value={phoneInput} placeholder="请输入手机号" enableNative={true} controlled={true} />
                 </View>
                 <View className="fmGroup hasBtn">
-                  <Input type="text" maxlength="4" onInput={this.codeInput} value={codeInput} placeholder="请输入图形验证码" enableNative={true} controlled={true} />
+                  <Input type="text" maxlength="4" onInput={this.handleInput('codeInput')} value={codeInput} placeholder="请输入图形验证码" enableNative={true} controlled={true} />
                   <Image className="captcha" src={codeImg} onClick={this.getCaptcha} /></View>
                 <View className="fmGroup hasBtn">
-                  <Input type="text" maxlength="6" onInput={this.yzmInput} value={yzmInput} placeholder="请输入短信验证码" enableNative={true} controlled={true} />
-                  <View className={`sendBtn ${phoneInput.length == 11 ? 'active' : ''}`} onClick={this.sendCode}>{sendSuccess ? counter + '秒后重试' : '获取验证码'}</View>
+                  <Input type="number" maxlength="6" onInput={this.handleInput('yzmInput')} value={yzmInput} placeholder="请输入短信验证码" enableNative={true} controlled={true} />
+                  <Button disabled={(phoneInput.length == 11 && codeInput.length == 4) ? false : true} className={`sendBtn ${phoneInput.length == 11 && codeInput.length == 4 ? 'active' : ''}`} onClick={this.sendCode}>{timer ? counter + '秒后重试' : '获取验证码'}</Button>
                 </View>
                 <View className="confirmbtn" onClick={this.subimitFun}>确定</View>
               </View>

@@ -31,13 +31,14 @@ export const handleAuth = (bool) => {
 /**
  * @description: 登录获取用户信息
  * @param {string} name 用户昵称
+ * @param {string} mobile 用户手机号
  * @return {function}
  */
-export const getMemberInfo = (name) => {
+export const getMemberInfo = (params) => {
   return async dispatch => {
     try {//用户存在
       const memberInfo = await Api.fetchUserInfo({
-        name
+        ...params
       }, { errToast: false })
       storage.set('memberInfo', memberInfo)
       const {
@@ -50,6 +51,7 @@ export const getMemberInfo = (name) => {
           memberInfo
         }
       })
+      return memberInfo
     } catch (err) {
       dispatch({
         type: HANDLE_AUTH,
@@ -68,6 +70,7 @@ export const getMemberInfo = (name) => {
       } else {
         
       }
+      return Promise.reject(err)
     }
   }
 }
