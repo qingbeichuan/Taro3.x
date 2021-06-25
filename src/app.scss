@@ -1,2 +1,10 @@
 @import "~taro-ui/dist/style/components/message.scss";
-// @import '~taro-ui/dist/style/index.scss';
+
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 28px; 
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
