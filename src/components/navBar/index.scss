@@ -1,75 +1,19 @@
 @import "~taro-ui/dist/style/components/icon";
-.nav-bar-wrap {
+.navBarBox {
   color: #000;
   background-color: '#fff';
   position: relative;
-  z-index: 1001;
-
-  &.bar-in-detail {
-    margin-bottom: -50PX;
-  }
-}
-
-.nav-bar {
-  position: relative;
-
-  .nbfwx {
-    height: 100%;
-    top: 40px;
-    left: 0;
-    display: flex;
-    align-items: center;
-  }
-
-  .nav-bar-left {
-    height: 100%;
-    padding: 0 40px;
+  z-index: 101;
+  .navBarIcon {
     position: absolute;
-    bottom: 0;
-    left: 0;
+    height: 100%;
     display: flex;
     align-items: center;
+    justify-content: center;
   }
-
-  .at-icon {
-    font-size: 40px;
-    color: #000;
-
-    &.white {
-      color: #fff;
-    }
-  }
-
-  .nav-image2 {
-    width: 16px;
-    height: 100%;
-    background: url('https://cnshacc1oss01.oss-cn-shanghai.aliyuncs.com/frontend/assets/left.png') center no-repeat;
-    background-size: 36px 36px;
-  }
-
-  .nav-top {
-    width: 108px;
-    height: 58px;
-    margin-top: 10px;
-  }
-
-  .nav-index {
-    width: 80px;
-    height: 80px;
-    margin-top: 10px;
-  }
-
-  .nav-bar-title {
-    font-size: 36px;
-    height: 100%;
-    margin: 0 100PX;
+  .navBarTitle {
     text-align: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
-    .title {
-      font-weight: 700;
-    }
+    font-size: 32px;
+    font-weight: 500;
   }
 }

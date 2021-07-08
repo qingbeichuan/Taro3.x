@@ -1,113 +1,190 @@
 import Taro from '@tarojs/taro'
-import { Component } from 'react'
-import { Text, View, Image } from '@tarojs/components'
-import classNames from 'classnames'
+import { View } from '@tarojs/components'
+import React, { useState, useEffect } from 'react'
+import { AtIcon } from 'taro-ui'
+import appConfig from '../../app.config'
 import './index.scss'
 
 const Env = Taro.getEnv();
-class NavBar extends Component {
-  static defaultProps = {
-    title: "",
-    showBack: true,
-    back: Function,
-    background: "#fff",
-    m_page: false
-  };
+// class NavBar extends Component {
+//   static defaultProps = {
+//     title: "首页",
+//     background: "#fff",
+//     color: "#333"
+//   };
 
-  state = {
-    statusBarHeight: 20,
-    navBarHeight: ''
-  };
+//   state = {
+//     statusBarHeight: 0,
+//     navBarHeight: 0
+//   };
 
-  componentWillMount() {
-    const info = Taro.getSystemInfoSync();
-    this.setState({
-      statusBarHeight: info.statusBarHeight || 0
-    });
-    this.calcNavbarHeight()
+//   componentWillMount() {
+//     this.calcNavbarHeight()
+//   }
+
+//   componentDidMount () {
+//     const pages = Taro.getCurrentPages()
+//     const isIndex = pages.length == 1
+//     const { route } = pages[pages.length - 1]
+//     const isShowIcon = config.pages.includes(route)
+//     console.log(isShowIcon)
+//     this.setState({
+//       isIndex,
+//       isShowIcon
+//     })
+//   }
+
+//   calcNavbarHeight() {
+//     const { height, top } = Taro.getMenuButtonBoundingClientRect();
+//     const { statusBarHeight } = Taro.getSystemInfoSync();
+//     const navBarHeight = (top - statusBarHeight) * 2 + height
+//     this.setState({
+//       navBarHeight,
+//       statusBarHeight
+//     })
+//   }
+
+//   handleBack = () => {
+//     const { isIndex } = this.state
+//     if (isIndex) {
+//       Taro.reLaunch({
+//         url: '/pages/index/index'
+//       })
+//     } else {
+//       Taro.navigateBack()
+//     }
+//   }
+
+//   render() {
+//     const { statusBarHeight, navBarHeight, isIndex, isShowIcon } = this.state;
+//     const { background, color, inDetail, title } = this.props;
+
+//     return (
+//       <View>
+//         { 
+//           Env == "ALIPAY" ? (
+//             null
+//           ) : (
+//             <View
+//               style={{
+//                 paddingTop: `${statusBarHeight}px`,
+//                 background,
+//                 color,
+//                 height: navBarHeight,
+//                 lineHeight: `${navBarHeight}px`
+//               }}
+//             >
+//               {
+//                 !isShowIcon &&
+//                 <View 
+//                   className="navBarIcon" 
+//                   style={{
+//                     height: navBarHeight,
+//                     width: navBarHeight,
+//                   }}
+//                   onClick={this.handleBack}
+//                 >
+//                   {
+//                     isIndex ? (
+//                       <AtIcon value='home' size='20' color={color}></AtIcon>
+//                     ) : (
+//                       <AtIcon value='chevron-left' size='26' color={color}></AtIcon>
+//                     )
+//                   }
+//                 </View>
+//               }
+//               <View className="navBarTitle">{title}</View>
+//             </View>
+//           )
+//         }
+//       </View>
+//     );
+//   }
+// }
+
+export default function NavBar({ background, color }) {
+  const [statusBarHeight, setStatusBarHeight] = useState(0);
+  const [navBarHeight, setNavBarHeight] = useState(0);
+  const [isIndex, setIsIndex] = useState(false);//当前页页面栈是否为第一
+  const [isShowIcon, setIsShowIcon] = useState(false);//tabbar页面不展示返回icon
+  const [title, setTitle] = useState();
+
+  useEffect(() => {
+    getPageInfo()
+    calcNavbarHeight()
+  }, [])
+
+  function getPageInfo() {
+    const pages = Taro.getCurrentPages()
+    const isIndex = pages.length == 1
+    const { route, config: { navigationBarTitleText: title } } = pages[pages.length - 1]
+    const isShowIcon = appConfig.pages.includes(route)
+    setIsIndex(isIndex)
+    setIsShowIcon(isShowIcon)
+    setTitle(title)
   }
 
-  calcNavbarHeight() {
+  function calcNavbarHeight() {
     const { height, top } = Taro.getMenuButtonBoundingClientRect();
-    const { statusBarHeight, system } = Taro.getSystemInfoSync();
+    const { statusBarHeight } = Taro.getSystemInfoSync();
     const navBarHeight = (top - statusBarHeight) * 2 + height
-    const addHeight = system.indexOf("iOS") === -1 ? 12 : 8;
-    this.setState({
-      navBarHeight
-    })
+    setStatusBarHeight(statusBarHeight)
+    setNavBarHeight(navBarHeight)
   }
-  
-  render() {
-    const { statusBarHeight, navBarHeight } = this.state;
-    const { inDetail } = this.props;
 
-    return (
-      <View>
-        { Env == "ALIPAY" && this.props.m_page ? '' :
+  function handleBack() {
+    if (isIndex) {
+      Taro.reLaunch({
+        url: '/pages/index/index'
+      })
+    } else {
+      Taro.navigateBack()
+    }
+  }
+  return (
+    <View>
+      {
+        Env == "ALIPAY" ? (
+          null
+        ) : (
           <View
-            className={classNames("nav-bar-wrap", { "bar-in-detail": inDetail })}
+            className="navBarBox"
             style={{
               paddingTop: `${statusBarHeight}px`,
-              background: this.props.background,
-              color: this.props.color
+              background,
+              color,
+              height: `${navBarHeight}px`,
+              lineHeight: `${navBarHeight}px`
             }}
           >
-            <View
-              className={`nav-bar class-name ${this.props.className || ""}`}
-              style={{
-                height: `${navBarHeight}px`,
-                lineHeight: `${navBarHeight}px`
-              }}
-            >
-              {/* 导航栏左侧内容 */}
-              {this.props.showBack ? (
-                Env == "WEAPP" && (
-                  <View
-                    className={this.props.m_page ? 'nav-bar-left' : 'nbfwx'}
-                    onClick={this.props.back.bind(this)}
-                    style={{
-                      top: this.props.m_page ? `0` : `${statusBarHeight}px`
-                    }}
-                  >
-                    <View
-                      className={classNames("at-icon", "at-icon-chevron-left", {
-                        white:
-                          this.props.background === "#000" ||
-                          this.props.color === "#fff"
-                      })}
-                    />
-                  </View>
-                )
-              ) : (
-                  <View className="nav-bar-left">
-                    {this.props.m_page ? (
-                      <View>
-                        {this.props.showIndex ? (
-                          <Image
-                            onClick={this.props.back.bind(this)}
-                            className="nav-index"
-                            src={(__STATIC_URL__+"/user/back.png")}
-                          />
-                        ) : null}
-                      </View>
-                    ) : (
-                        <Image
-                          className="nav-top"
-                          src={(__STATIC_URL__+"/top.png")}
-                        />
-                      )}
-                  </View>
-                )}
-              {/* 导航栏中间内容 */}
-              <View className="nav-bar-title">
-                <Text className="title">{this.props.title}</Text>
+            {
+              !isShowIcon &&
+              <View
+                className="navBarIcon"
+                style={{
+                  height: navBarHeight,
+                  width: navBarHeight,
+                }}
+                onClick={handleBack}
+              >
+                {
+                  isIndex ? (
+                    <AtIcon value='home' size='20' color={color}></AtIcon>
+                  ) : (
+                    <AtIcon value='chevron-left' size='22' color={color}></AtIcon>
+                  )
+                }
               </View>
-            </View>
+            }
+            <View className="navBarTitle">{title}</View>
           </View>
-        }
-      </View>
-    );
-  }
+        )
+      }
+    </View>
+  );
 }
 
-export default NavBar;
+NavBar.defaultProps = {
+  background: "#fff",
+  color: "#333"
+};

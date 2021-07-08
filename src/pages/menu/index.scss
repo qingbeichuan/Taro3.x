@@ -1,0 +1,32 @@
+.shoppingCart {
+  width: 240px;
+  height: 80px;
+  border: 1px solid #333;
+  line-height: 80px;
+  text-align: center;
+  margin-top: 50px;
+}
+
+.product {
+  display: flex;
+  justify-content: flex-end;
+  .item {
+    width: 240px;
+    height: 80px;
+    border: 1px solid #333;
+    line-height: 80px;
+    margin-bottom: 50px;
+    text-align: center;
+  }
+}
+
+.move {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: green;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  opacity: 0.6;
+}

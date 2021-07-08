@@ -38,15 +38,16 @@
   "dependencies": {
     "@babel/runtime": "^7.7.7",
     "@tarojs/components": "3.2.10",
+    "@tarojs/react": "3.2.10",
     "@tarojs/runtime": "3.2.10",
     "@tarojs/taro": "3.2.10",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.0",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
-    "redux": "^4.0.0",
-    "react-redux": "^7.2.0",
-    "react-dom": "^17.0.0",
-    "@tarojs/react": "3.2.10",
-    "react": "^17.0.0"
+    "taro-ui": "^3.0.0-alpha.10"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.13.6",
@@ -60,7 +61,6 @@
     "eslint-plugin-react": "^7.8.2",
     "eslint-plugin-import": "^2.12.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "stylelint": "9.3.0",
-    "taro-ui": "^3.0.0-alpha"
+    "stylelint": "9.3.0"
   }
 }

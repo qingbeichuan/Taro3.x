@@ -5,19 +5,21 @@ const accountInfo = Taro.getAccountInfoSync();
 const {
   envVersion
 } = accountInfo.miniProgram;
-if (!envVersion) {
-  console.error("获取运行环境失败!");
-}
 let host = ''
+if (!envVersion) {
+  console.error("Taro.getAccountInfoSync 获取运行环境失败!");
+  host = 'https://uatwechat.timhortons.com.cn/tim-weixin/wechat'
+}
+
 switch (envVersion) {
   case 'develop':
     host = "https://uatwechat.timhortons.com.cn/tim-weixin/wechat"
     break;
   case 'trial':
-    host = "https://mock.mengxuegu.com/mock/609ab96cc7b7385be0a8363f/example"
+    host = "https://uatwechat.timhortons.com.cn/tim-weixin/wechat"
     break;
   case 'release':
-    host = "https://mock.mengxuegu.com/mock/609ab96cc7b7385be0a8363f/example"
+    host = "https://member.timhortons.com.cn/tim-weixin/wechat"
     break;
 }
 

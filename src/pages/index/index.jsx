@@ -79,14 +79,20 @@ class Index extends Component {
       this.props.add()
     }
   }
+  
+  dec = () => {
+    Taro.navigateTo({
+      url: '/pages/detail/index',
+    })
+  }
 
   render () {
     return (
       <View className='container'>
         <NavBar></NavBar>
-        <View>
+        <View className="main">
           <Button className='add_btn' onClick={this.add}>+</Button>
-          <Button className='dec_btn' onClick={this.props.dec}>-</Button>
+          <Button className='dec_btn' onClick={this.dec}>-</Button>
           <Button className='dec_btn' onClick={this.props.asyncAdd}>async</Button>
           <View><Text>{this.props.counter.num}</Text></View>
           <View><Text>Hello, World</Text></View>

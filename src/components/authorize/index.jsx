@@ -6,7 +6,6 @@ import { handleAuth, getMemberInfo } from '@/actions/global'
 import { storage } from '@/utils/tools'
 import * as Api from '@/api/index'
 import { isEmptyObject } from '@/utils/tools'
-import { AtMessage } from 'taro-ui'
 import config from '../../api/config'
 import './index.scss'
 
@@ -51,7 +50,7 @@ class Authorize extends Component {
     return null
   }
 
-  confirmAuthrize(res) {
+  confirmAuthrize = (res) => {
     if (Env === 'ALIPAY') {
       Taro.getOpenUserInfo({
         fail: (res) => {
@@ -65,15 +64,22 @@ class Authorize extends Component {
         }
       });
     } else if (Env === 'WEAPP') {
-      const { encryptedData, iv, userInfo } = res.detail;
-      encryptedData && Taro.setStorageSync('encryptedData', encryptedData);
-      iv && Taro.setStorageSync('iv', iv);
-      userInfo && Taro.setStorageSync('userInfo', userInfo);
-      this.props.userInfoAuthorized(userInfo);
+      const { userInfo } = res.detail;
+      if (userInfo) {
+        console.log(userInfo)
+        storage.set('userInfo', userInfo)
+        this.userLogin(userInfo.nickName)
+      }
+      this.props.handleAuth(false)//先置为false，防止登陆弹框闪烁
     }
   }
 
-  handleProfileAuthorize = () => {
+  handleProfileAuthorize = async () => {
+    // try {
+    //   const { userInfo } = await Taro.getUserProfile()
+    // } catch (error) {
+      
+    // }
     wx.getUserProfile({
       desc: '用于完善会员资料',
       success: ({ userInfo }) => {
@@ -87,26 +93,25 @@ class Authorize extends Component {
     })
   }
 
-  userLogin = (name) => {//授权完成之后登陆
-    wx.login({
-      success: async ({ code }) => {
-        try {
-          const { openId, unionid: unionId } = await Api.jsCode2Openid({ jscode: code });
-          storage.set('openId', openId)
-          storage.set('unionId', unionId)
-          await this.props.getMemberInfo({name})
-          Taro.atMessage({
-            'message': '登陆成功',
-            'type': 'success',
-          })
-        } catch (err) {
-          console.log('err', err.msg);
-        }
-      },
-      fail: (err) => {
-        log.error('wx.login超时,' + JSON.stringify(err));
-      }
-    })
+  userLogin = async (name) => {//授权完成之后登陆
+    try {
+      const { code } = await Taro.login()
+      const { openId, unionid: unionId } = await Api.jsCode2Openid({ jscode: code });
+      storage.set('openId', openId)
+      storage.set('unionId', unionId)
+      await this.props.getMemberInfo({name})
+      Taro.showToast({
+        title: '登陆成功',
+        icon: 'success',
+      })
+      console.log('登陆成功');
+    } catch (err) {
+      console.log(err);
+      Taro.showToast({
+        title: err,
+        icon: 'none',
+      })
+    }
   }
 
   phoneAuthorized = async res => {
@@ -172,10 +177,7 @@ class Authorize extends Component {
             name
           })
           await this.props.getMemberInfo({ mobile })
-          Taro.atMessage({
-            'message': '登陆成功',
-            'type': 'success',
-          })
+          console.log('登陆成功');
           this.setState({
             panelYzmShow: false
           })
@@ -269,7 +271,7 @@ class Authorize extends Component {
       userClick,
       memberInfo,
     } = this.props;
-    const { panelYzmShow, phoneInput, codeInput, codeImg, yzmInput, sendSuccess , counter } = this.state
+    const { panelYzmShow, phoneInput, codeInput, codeImg, yzmInput, counter } = this.state
     return (
       <View>
         {
@@ -283,8 +285,8 @@ class Authorize extends Component {
                 {Env === 'WEAPP' && <View class="title">微信授权</View>}
                 <View class="tit">Tims需要获取您的用户信息</View>
                 <View className="flex-item confirmBtn">
-                  {Env === 'ALIPAY' && <Button className="btn" scope="userInfo" open-type="getAuthorize" onClick={this.handleTrackConfirm.bind(this)} onGetAuthorize={this.confirmAuthrize.bind(this)}>确定</Button>}
-                  {Env === 'WEAPP' && (canIUseGetUserProfile ? <Button className="btn" onClick={this.handleProfileAuthorize}>授权登录</Button> : <Button className="btn" open-type="getUserInfo" bindgetuserinfo={this.confirmAuthrize.bind(this)}>{commonIcon}授权登录</Button>)}
+                  {Env === 'ALIPAY' && <Button className="btn" scope="userInfo" open-type="getAuthorize" onClick={this.handleTrackConfirm.bind(this)} onGetAuthorize={this.confirmAuthrize}>确定</Button>}
+                  {Env === 'WEAPP' && (canIUseGetUserProfile ? <Button className="btn" onClick={this.handleProfileAuthorize}>授权登录</Button> : <Button className="btn" open-type="getUserInfo" ongetuserinfo={this.confirmAuthrize}>授权登录</Button>)}
                 </View>
               </View>
             </View>
@@ -329,7 +331,6 @@ class Authorize extends Component {
             </View>
           </View>
         }
-        <AtMessage />
       </View>
     )
   }
