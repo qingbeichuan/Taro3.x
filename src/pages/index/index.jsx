@@ -82,7 +82,7 @@ class Index extends Component {
   
   dec = () => {
     Taro.navigateTo({
-      url: '/pages/detail/index',
+      url: '/act/pages/index/index?id=123',
     })
   }
 

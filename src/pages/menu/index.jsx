@@ -4,7 +4,6 @@ import { View, Button, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import NavBar from '@/components/navBar' 
 import { add, minus, asyncAdd } from '../../actions/counter'
-import Parabola from '@/utils/parabola'
 import './index.scss'
 
 
@@ -23,7 +22,6 @@ import './index.scss'
 }))
 class Menu extends Component {
   state = {
-    parabola: {},
     res: {}
   }
   componentWillReceiveProps (nextProps) {
@@ -33,45 +31,12 @@ class Menu extends Component {
   componentWillUnmount () { }
 
   onReady () {
-    this.getRect()
   }
 
   componentDidHide () { }
 
-  addCart = (e) => {
-    const { target } = this.state
-    console.log('e', e);
-    let parabola = new Parabola({
-      origin: e.detail,
-      target: target,
-      element: '.move',
-      callback: (res) => {
-        // console.log(res);
-        this.setState({
-          res
-        })
-      }
-    });
-    // console.log(parabola)
-    this.setState({
-      parabola
-    }, () => {
-      parabola.move()
-    })
-  }
-
-  getRect() {
-    Taro.createSelectorQuery().select('.shoppingCart').boundingClientRect((rect) => {
-      console.log(rect);
-      this.setState({
-        target: rect
-      })
-    }).exec()
-  }
 
   render () {
-    const { parabola, res } = this.state
-    console.log(parabola);
     return (
       <View className='container'>
         <NavBar></NavBar>
@@ -86,14 +51,6 @@ class Menu extends Component {
               )
             })
           }
-          <View 
-            className="move"
-            style={{
-              left: parabola.originX,
-              top: parabola.originY,
-              transform: 'translate(' + (res.x || 0) + 'px,' + (res.y || 0) + 'px)'
-            }}
-          ></View>
         </View>
       </View>
     )

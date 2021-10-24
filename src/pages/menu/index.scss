@@ -1,32 +1,58 @@
 .shoppingCart {
-  width: 240px;
-  height: 80px;
+  width: 150px;
+  height: 120px;
   border: 1px solid #333;
-  line-height: 80px;
+  line-height: 120px;
   text-align: center;
-  margin-top: 50px;
+  position: fixed;
+  left: 45px;
+  top: 80%;
 }
 
 .product {
   display: flex;
   justify-content: flex-end;
+  // width: 400px;
+  margin-bottom: 50px;
+  .img {
+    height: 150px;
+    width: 150px;
+  }
+  .box {
+    width: 250px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
   .item {
-    width: 240px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     border: 1px solid #333;
-    line-height: 80px;
-    margin-bottom: 50px;
-    text-align: center;
+    border-radius: 50%;
   }
 }
 
 .move {
-  width: 30px;
-  height: 30px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: green;
   position: fixed;
   left: 0;
   bottom: 0;
   opacity: 0.6;
+}
+
+/*抛物线动画*/
+.good_box {
+  width: 100px;
+  height: 100px;
+  position: fixed;
+  // border-radius: 50%;
+  overflow: hidden;
+  left: 50%;
+  top: 50%;
+  z-index: +99;
+  border: 1px solid rgba(0, 116, 255, 0.61);
+  background: rgba(120, 188, 255, 0.2);
 }

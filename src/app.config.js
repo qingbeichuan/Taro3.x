@@ -5,9 +5,9 @@ export default {
   ],
   "subpackages": [
     {
-      "root": "pages/detail",
+      "root": "act",
       "pages": [
-        "index"
+        "pages/index/index",
       ]
     }
   ],
